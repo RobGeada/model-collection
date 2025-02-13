@@ -2,11 +2,15 @@ import json
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+import openvino as ov
 import pandas as pd
-import xgboost
+
+import tensorflow as tf
+from tensorflow import keras
+import tensorflow.keras.backend as K
 
 plt.style.use('https://raw.githubusercontent.com/RobGeada/stylelibs/main/material_rh.mplstyle')
-print(f"Using xgboost version={xgboost.__version__}")
+
 
 # === UTILITY ======================================================================================
 np.random.seed(1)
@@ -108,14 +112,20 @@ def get_data_splits():
 # ===TRAIN MODEL ===================================================================================
 def train_model(train_x, train_y, test_x, test_y):
     print("Training model")
-    xgb_model = xgboost.XGBRegressor(objective="reg:squarederror", random_state=42)
-    xgb_model.fit(train_x, train_y);
-    print("\tTrain R^2:", xgb_model.score(train_x, train_y))
-    print("\tTest R^2: ", xgb_model.score(test_x, test_y))
 
-    model_path = MODEL_NAME+".json"
-    print(f"Saving model to {os.path.join(os.getcwd(), model_path)}")
-    xgb_model.save_model(model_path)
+    tf.keras.utils.set_random_seed(0)
+    model = keras.Sequential([
+        keras.layers.Input(shape=(4,), name="credit_inputs", dtype="float64"),
+        keras.layers.BatchNormalization(),
+        keras.layers.Dense(64, input_dim=11, activation="relu"),
+        keras.layers.Dense(64, activation="relu"),
+        keras.layers.Dense(64, activation="relu"),
+        keras.layers.Dense(1, activation="sigmoid"),
+    ], name='predict')
+    model.compile(optimizer='Adam', loss="mse", metrics=["mse"])
+
+    model.fit(train_x, train_y, validation_data=(test_x, test_y), epochs=16)
+    return model
 
 
 def generate_distribution_plot(train_x, train_y, test_x, test_y):
@@ -189,9 +199,16 @@ def save_data(train_x, train_y, test_x, test_y):
                 f, indent=2)
 
 
+def save_model(model):
+    model.export("gaussian-credit-model")
+    ov_model = ov.convert_model("gaussian-credit-model")
+    ov.save_model(ov_model, "gaussian-credit-model.xml")
+
+
 # === MAIN ===================================================================================
 if __name__ == "__main__":
     train_x, train_y, test_x, test_y = get_data_splits()
-    train_model(train_x, train_y, test_x, test_y)
+    model = train_model(train_x, train_y, test_x, test_y)
     generate_distribution_plot(train_x, train_y, test_x, test_y)
     save_data(train_x, train_y, test_x, test_y)
+    save_model(model)

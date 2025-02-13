@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 import openvino as ov
 import os
 import pandas as pd
-from openvino import PartialShape
 from sklearn.model_selection import train_test_split
 
 import tensorflow as tf
@@ -141,15 +140,14 @@ class Gater(tf.keras.layers.Layer):
         return output
 
 def initialize_model():
-    layers = keras.layers
 
-    input = layers.Input(shape=(11,), name="customer_data_input", dtype="float64")
+    input = keras.layers.Input(shape=(11,), name="customer_data_input", dtype="float64")
     output = keras.Sequential([
-        layers.BatchNormalization(),
-        layers.Dense(64, input_dim = 11, activation="relu"),
-        layers.Dense(64, activation = "relu"),
-        layers.Dense(64, activation = "relu"),
-        layers.Dense(1, activation = "sigmoid"),
+        keras.layers.BatchNormalization(),
+        keras.layers.Dense(64, input_dim = 11, activation="relu"),
+        keras.layers.Dense(64, activation = "relu"),
+        keras.layers.Dense(64, activation = "relu"),
+        keras.layers.Dense(1, activation = "sigmoid"),
     ])(input)
     model = keras.Model(inputs=input, outputs=output)
     model.compile(optimizer='Adam', loss="binary_crossentropy", metrics = ["accuracy"])
