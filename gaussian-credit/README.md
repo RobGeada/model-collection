@@ -17,7 +17,7 @@ are saved in the `data` repo, one containing a single payload of "training" data
 
 
 ## Deploying the Gaussian Credit models on ODH/RHOAI
-1) Deploy the [Model Storage Container](https://github.com/trustyai-explainability/odh-trustyai-demos/blob/main/2-BiasMonitoring/modelmesh-demo/resources/model_storage_container.yaml)
+1) Deploy the Model Storage Container
 2) Deploy the default OVMS Serving Runtime, installable from ODH dashboard, and make a note of the name you assign the runtime.
 3) Deploy the following ISVC:
 
@@ -26,7 +26,7 @@ are saved in the `data` repo, one containing a single payload of "training" data
 apiVersion: serving.kserve.io/v1beta1
 kind: InferenceService
 metadata:
-  name: loan-model-$ALPHA_OR_BETA
+  name: gaussian-credit-model
   annotations:
     serving.kserve.io/deploymentMode: ModelMesh
   labels:
@@ -35,8 +35,8 @@ spec:
   predictor:
     model:
       modelFormat:
-        name: openvino
+        name: openvino_ir
       runtime: $RUNTIME_NAME
       storage:
         key: aws-connection-minio-data-connection
-        path: sklearn/gaussian-credit
+        path: openvino/gaussian-credit

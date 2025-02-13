@@ -20,7 +20,7 @@ This progression of bias in the two models can be seen here, with the x-axis cor
 ![SPD Progression](spd_progression.png)
 
 ## Deploying the loan models models on ODH/RHOAI
-1) Deploy the [Model Storage Container](https://github.com/trustyai-explainability/odh-trustyai-demos/blob/main/2-BiasMonitoring/modelmesh-demo/resources/model_storage_container.yaml)
+1) Deploy the Model Storage Container
 2) Deploy the default OVMS Serving Runtime, installable from ODH dashboard, and make a note of the name you assign the runtime.
 3) Configure and deploy the following ISVC:
    1) Replace `$ALPHA_OR_BETA` with `alpha` or `beta` depending on which model you want to deploy 
